@@ -64,7 +64,7 @@ public class BackgroundNotificationsFetchService extends NotificationListenerSer
         //SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         //mac = settings.getString(getString(R.string.ble_mac_string_key), "");
 
-        connectDevice(mac);
+        //connectDevice(mac);
         //Toast.makeText(this, "NEW NOTIFICATION", Toast.LENGTH_LONG).show();
         Log.d("OLED","0001"+title+"0002"+text+"0003"+package_name);
     }
@@ -80,20 +80,20 @@ public class BackgroundNotificationsFetchService extends NotificationListenerSer
     }
 
     private void connectDevice(String mac) {
-        final Disposable subscribe = bluetoothManager.openSerialDevice(mac).subscribe(this::onConnected, this::onError);
+        //final Disposable subscribe = bluetoothManager.openSerialDevice(mac).subscribe(this::onConnected, this::onError);
     }
 
     private void onConnected(BluetoothSerialDevice connectedDevice) {
         // You are now connected to this device!
         // Here you may want to retain an instance to your device:
         Toast.makeText(this, "CONNECTED", Toast.LENGTH_SHORT).show();
-        SimpleBluetoothDeviceInterface deviceInterface = connectedDevice.toSimpleDeviceInterface();
+        //SimpleBluetoothDeviceInterface deviceInterface = connectedDevice.toSimpleDeviceInterface();
 
         // Listen to bluetooth events
-        deviceInterface.setListeners(this::onMessageReceived, this::onMessageSent, this::onError);
+        //deviceInterface.setListeners(this::onMessageReceived, this::onMessageSent, this::onError);
 
         // Let's send a message:
-        deviceInterface.sendMessage("0001"+title+"0002"+text+"0003"+package_name);
+        //deviceInterface.sendMessage("0001"+title+"0002"+text+"0003"+package_name);
     }
 
     private void onMessageSent(String message) {
