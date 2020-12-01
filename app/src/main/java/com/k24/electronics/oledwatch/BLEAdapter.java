@@ -12,6 +12,7 @@ import java.util.UUID;
 
 public class BLEAdapter extends BluetoothGattCallback {
     private String TAG = "OLEDWATCH-BT";
+    private String message = "\\\\\\\\\\\\\\\\\\\\connected successfully";
     private BlutoothRequester requester;
     public BLEAdapter(BlutoothRequester requester1) {
         super();
@@ -27,8 +28,8 @@ public class BLEAdapter extends BluetoothGattCallback {
         }
         else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
             Log.i(TAG, "Disconnected from GATT server.");
-            gatt.close();
-            Toast.makeText(requester.passContext(), "Restart your Bluetooth", Toast.LENGTH_LONG).show();
+            //gatt.close();
+            //Toast.makeText(requester.passContext(), "Restart your Bluetooth", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -39,8 +40,7 @@ public class BLEAdapter extends BluetoothGattCallback {
             BluetoothGattCharacteristic characteristic = requester.findCharacteristic(gatt,requester.getUuid_characteristics());
             requester.setCharacteristic_global(characteristic);
             Log.d(TAG, "characreristic null? = " + Boolean.toString(requester.getCharacteristic_global() == null));
-            requester.writeCharacteristic(gatt,characteristic, "TEST6969696969");
-            // success, we can communicate with the device
+            requester.writeCharacteristic(gatt,characteristic, message);
         } else {
             // failure
             Log.d(TAG, "onservicesdiscovered - failure");
@@ -75,5 +75,13 @@ public class BLEAdapter extends BluetoothGattCallback {
     @Override
     public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
         super.onReadRemoteRssi(gatt, rssi, status);
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

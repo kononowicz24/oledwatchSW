@@ -1,29 +1,45 @@
 package com.k24.electronics.oledwatch;
 
+import android.app.Notification;
 import android.app.Service;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattService;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
+import android.text.SpannableString;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.harrysoft.androidbluetoothserial.BluetoothManager;
-import com.harrysoft.androidbluetoothserial.BluetoothSerialDevice;
-import com.harrysoft.androidbluetoothserial.SimpleBluetoothDeviceInterface;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
+import java.util.Arrays;
+import java.util.UUID;
 
-public class BackgroundNotificationsFetchService extends NotificationListenerService {
-    private BluetoothManager bluetoothManager;
+
+public class BackgroundNotificationsFetchService extends NotificationListenerService implements BlutoothRequester {
     private String title;
     private String text;
     private String package_name;
+
     private String mac = "90:9A:77:2B:08:F5";
+    private String TAG = "OLW1 - NOTIFYSERV";
+    //private UUID uuid_service = UUID.fromString("0000ffe0-0000-1000-8000-00805F9B34FB");
+    private UUID uuid_characteristics = UUID.fromString("0000ffe1-0000-1000-8000-00805F9B34FB");
+    private BluetoothGattCharacteristic characteristic_global;
+    private BLEAdapter bleAdapter = new BLEAdapter(this);
+    private BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    private BluetoothGatt bluetoothGatt_global;
+
     public BackgroundNotificationsFetchService() {
 
     }
@@ -36,37 +52,32 @@ public class BackgroundNotificationsFetchService extends NotificationListenerSer
     @Override
     public void onCreate() {
         super.onCreate();
-        bluetoothManager = BluetoothManager.getInstance();
-        if (bluetoothManager == null) {
-            // Bluetooth unavailable on this device :( tell the user
-            Toast.makeText(this, "Bluetooth not available.", Toast.LENGTH_LONG).show(); // Replace context with your context instance.
-        }
     }
 
     @Override
     public void onStart(Intent intent, int startId) {
         super.onStart(intent, startId);
-        //Toast.makeText(this,"TEST", Toast.LENGTH_LONG).show();
     }
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn){
         // Implement what you want here
         package_name = sbn.getPackageName();
+        Notification notification = sbn.getNotification();
         if (! package_name.equalsIgnoreCase("com.digibites.accubattery")) {
-            title = "" + sbn.getNotification().extras.getString("android.title");
-            text = "" + sbn.getNotification().extras.getString("android.text");
+           title = notification.extras.getString("android.title");
+            if (notification.extras.getCharSequenceArray("android.textLines") != null) {
+                text = Arrays.toString(notification.extras.getCharSequenceArray("android.textLines"));
+                text = text.substring(0, Math.min(text.length(), 180));
+            }
         } else {
-            title = "";
-            text = "";
+           title = "";
+           text = "";
+           return;
         }
-
-        //SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        //mac = settings.getString(getString(R.string.ble_mac_string_key), "");
-
-        //connectDevice(mac);
-        //Toast.makeText(this, "NEW NOTIFICATION", Toast.LENGTH_LONG).show();
-        Log.d("OLED","0001"+title+"0002"+text+"0003"+package_name);
+        //Log.d("OLED","\t"+title+"\t"+text+"\t"+package_name);
+        bleAdapter.setMessage("\\\\\\\\\\\\\\\\"+package_name+"\\"+text+"\\"+package_name);
+        connect(mac);
     }
 
     @Override
@@ -79,37 +90,84 @@ public class BackgroundNotificationsFetchService extends NotificationListenerSer
         super.onDestroy();
     }
 
-    private void connectDevice(String mac) {
-        //final Disposable subscribe = bluetoothManager.openSerialDevice(mac).subscribe(this::onConnected, this::onError);
+    @Override
+    public boolean connect(String address) {
+        Log.i(TAG, "Connecting to " + address);
+        if (mBluetoothAdapter == null || address == null) {
+            Log.w(TAG, "BluetoothAdapter not initialized or unspecified address.");
+            return false;
+        }
+
+        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(mac);
+
+        Log.d(TAG, device.getAddress());
+        // We want to directly connect to the device, so we are setting the autoConnect
+        // parameter to false.
+        BluetoothGatt bluetoothGatt = device.connectGatt(this.getBaseContext(), false, bleAdapter);
+        bluetoothGatt_global = bluetoothGatt;
+        Log.d(TAG, "Trying to create a new connection.");
+        return true;
     }
 
-    private void onConnected(BluetoothSerialDevice connectedDevice) {
-        // You are now connected to this device!
-        // Here you may want to retain an instance to your device:
-        Toast.makeText(this, "CONNECTED", Toast.LENGTH_SHORT).show();
-        //SimpleBluetoothDeviceInterface deviceInterface = connectedDevice.toSimpleDeviceInterface();
+    @Override
+    public BluetoothGattCharacteristic findCharacteristic(BluetoothGatt bluetoothGatt, UUID characteristicUUID) {
+        if (bluetoothGatt == null) {
+            Log.d(TAG, "FAIL: findcharacteristics -> GATT = NULL");
+            return null;
+        }
+        for (BluetoothGattService service : bluetoothGatt.getServices()) {
 
-        // Listen to bluetooth events
-        //deviceInterface.setListeners(this::onMessageReceived, this::onMessageSent, this::onError);
+            BluetoothGattCharacteristic characteristic = service.getCharacteristic(characteristicUUID);
+            if (characteristic != null) {
+                Log.d(TAG, "OK: findcharacteristics -> characteristic not null" + characteristic.getUuid().toString());
+                return characteristic;
+            }
+        }
 
-        // Let's send a message:
-        //deviceInterface.sendMessage("0001"+title+"0002"+text+"0003"+package_name);
+        return null;
     }
 
-    private void onMessageSent(String message) {
-        // We sent a message! Handle it here.
-        //Toast.makeText(this, "Sent a message! Message was: " + message, Toast.LENGTH_LONG).show(); // Replace context with your context instance.
-        bluetoothManager.close();
+    @Override
+    public boolean writeCharacteristic(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, String value) {
+        BluetoothGatt bluetoothGatt = bluetoothGatt_global;
+        Log.d(TAG, "WriteCharacteristic:"+bluetoothGatt.toString());
+        characteristic.setValue(value);
+        if (bluetoothGatt != null) {
+            return bluetoothGatt.writeCharacteristic(characteristic);
+        }
+
+        //gatt.disconnect();
+        return false;
     }
 
-    private void onMessageReceived(String message) {
-        // We received a message! Handle it here.
-        //Toast.makeText(context, "Received a message! Message was: " + message, Toast.LENGTH_LONG).show(); // Replace context with your context instance.
+    @Override
+    public void disconnect(BluetoothGatt gatt) {
+
+        if (mBluetoothAdapter == null) {
+            Log.w(TAG, "BluetoothAdapter not initialized");
+        }
+
+        if (gatt != null) {
+            //gatt.disconnect();
+            Log.w(TAG, "can be safely disconnected");
+        }
     }
 
-    private void onError(Throwable error) {
-        // Handle the error
-        bluetoothManager.close();
-        Log.d("OLEDWATCH","HUJ",error);
+    public UUID getUuid_characteristics() {
+        return uuid_characteristics;
+    }
+
+    public BluetoothGattCharacteristic getCharacteristic_global() {
+        return characteristic_global;
+    }
+
+    public void setCharacteristic_global(BluetoothGattCharacteristic characteristic_global) {
+        this.characteristic_global = characteristic_global;
+    }
+
+
+    @Override
+    public Context passContext() {
+        return getBaseContext();
     }
 }

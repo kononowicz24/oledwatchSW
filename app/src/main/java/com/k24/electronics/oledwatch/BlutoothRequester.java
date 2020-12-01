@@ -11,8 +11,6 @@ public interface BlutoothRequester {
     BluetoothGattCharacteristic findCharacteristic(BluetoothGatt gatt, UUID characteristicUUID);
     boolean writeCharacteristic(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, String value);
     void disconnect(BluetoothGatt gatt);
-    String getMac();
-    UUID getUuid_service();
     UUID getUuid_characteristics() ;
     BluetoothGattCharacteristic getCharacteristic_global();
     void setCharacteristic_global(BluetoothGattCharacteristic characteristic_global);
