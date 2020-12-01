@@ -67,16 +67,16 @@ public class BackgroundNotificationsFetchService extends NotificationListenerSer
         if (! package_name.equalsIgnoreCase("com.digibites.accubattery")) {
            title = notification.extras.getString("android.title");
             if (notification.extras.getCharSequenceArray("android.textLines") != null) {
-                text = Arrays.toString(notification.extras.getCharSequenceArray("android.textLines"));
-                text = text.substring(0, Math.min(text.length(), 180));
+                text = "\\\\"+package_name+"\\" + Arrays.toString(notification.extras.getCharSequenceArray("android.textLines"));
+                text = text.substring(0, Math.min(text.length(), 55));
             }
         } else {
            title = "";
            text = "";
            return;
         }
-        //Log.d("OLED","\t"+title+"\t"+text+"\t"+package_name);
-        bleAdapter.setMessage("\\\\\\\\\\\\\\\\"+package_name+"\\"+text+"\\"+package_name);
+        Log.d(TAG, ""+ text);
+        bleAdapter.setMessage("\\\\"+package_name+"\\");
         connect(mac);
     }
 
