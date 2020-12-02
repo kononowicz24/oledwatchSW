@@ -67,7 +67,7 @@ public class BackgroundNotificationsFetchService extends NotificationListenerSer
         if (! package_name.equalsIgnoreCase("com.digibites.accubattery")) {
            title = notification.extras.getString("android.title");
             if (notification.extras.getCharSequenceArray("android.textLines") != null) {
-                text = "\\\\"+package_name+"\\" + Arrays.toString(notification.extras.getCharSequenceArray("android.textLines"));
+                text = /*"\\\\"+package_name+"\\" +*/ "\\\\" + Arrays.toString(notification.extras.getCharSequenceArray("android.textLines"));
                 text = text.substring(0, Math.min(text.length(), 55));
             }
         } else {
@@ -76,7 +76,7 @@ public class BackgroundNotificationsFetchService extends NotificationListenerSer
            return;
         }
         Log.d(TAG, ""+ text);
-        bleAdapter.setMessage("\\\\"+package_name+"\\");
+        bleAdapter.setMessage(text);
         connect(mac);
     }
 
@@ -132,6 +132,7 @@ public class BackgroundNotificationsFetchService extends NotificationListenerSer
         BluetoothGatt bluetoothGatt = bluetoothGatt_global;
         Log.d(TAG, "WriteCharacteristic:"+bluetoothGatt.toString());
         characteristic.setValue(value);
+        Log.d(TAG, characteristic.getStringValue(0));
         if (bluetoothGatt != null) {
             return bluetoothGatt.writeCharacteristic(characteristic);
         }
