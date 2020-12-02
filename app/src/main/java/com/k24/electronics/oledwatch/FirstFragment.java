@@ -32,14 +32,6 @@ import java.util.UUID;
 
 public class FirstFragment extends Fragment {
     private EditText macAddrEditText;
-   // private String mac = "90:9A:77:2B:08:F5";
-   // private String TAG = "OLEDWATCH";
-   // //private UUID uuid_service = UUID.fromString("0000ffe0-0000-1000-8000-00805F9B34FB");
-   // private UUID uuid_characteristics = UUID.fromString("0000ffe1-0000-1000-8000-00805F9B34FB");
-   // private BluetoothGattCharacteristic characteristic_global;
-   // //private BLEAdapter bleAdapter = new BLEAdapter(this);
-   // private BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-   // private BluetoothGatt bluetoothGatt_global;
 
     @Override
     public View onCreateView(
