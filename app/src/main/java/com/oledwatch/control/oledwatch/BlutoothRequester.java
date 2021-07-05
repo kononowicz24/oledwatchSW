@@ -1,4 +1,4 @@
-package com.k24.electronics.oledwatch;
+package com.oledwatch.control.oledwatch;
 
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;

@@ -1,7 +1,6 @@
-package com.k24.electronics.oledwatch;
+package com.oledwatch.control.oledwatch;
 
 import android.app.Notification;
-import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -9,17 +8,10 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.Build;
-import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Parcelable;
-import android.preference.PreferenceManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-import android.text.SpannableString;
 import android.util.Log;
-import android.widget.Toast;
 
 
 import java.util.Arrays;
@@ -136,8 +128,6 @@ public class BackgroundNotificationsFetchService extends NotificationListenerSer
         if (bluetoothGatt != null) {
             return bluetoothGatt.writeCharacteristic(characteristic);
         }
-
-        //gatt.disconnect();
         return false;
     }
 

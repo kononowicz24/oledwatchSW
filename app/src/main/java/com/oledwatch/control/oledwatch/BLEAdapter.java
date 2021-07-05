@@ -1,4 +1,4 @@
-package com.k24.electronics.oledwatch;
+package com.oledwatch.control.oledwatch;
 
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
@@ -6,9 +6,6 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothProfile;
 import android.util.Log;
-import android.widget.Toast;
-
-import java.util.UUID;
 
 public class BLEAdapter extends BluetoothGattCallback {
     private String TAG = "OLEDWATCH-BT";
@@ -55,6 +52,7 @@ public class BLEAdapter extends BluetoothGattCallback {
     @Override
     public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
         super.onCharacteristicWrite(gatt, characteristic, status);
+        Log.d(TAG, "OnCharacteristicWrite()");
     }
 
     @Override
